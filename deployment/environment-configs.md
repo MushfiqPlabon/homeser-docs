@@ -17,12 +17,17 @@ ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com,.yourdomain.com
 
 ### Database Configuration
 ```bash
+# Primary method (recommended):
+DATABASE_URL=postgresql://user:pass@host:6543/database
+
+# Fallback method (if DATABASE_URL not set):
 DB_NAME=your_database_name
 DB_USER=your_database_user
 DB_PASSWORD=your_database_password
 DB_HOST=your_postgres_host.supabase.co
-DB_PORT=5432
+DB_PORT=6543
 ```
+[See: deployment/common-configuration.md#database-configuration] for detailed DATABASE_URL format and connection pooling settings.
 
 ## Authentication & Security
 
@@ -71,6 +76,7 @@ EMAIL_HOST_PASSWORD=your_smtp_password
 EMAIL_USE_TLS=True
 DEFAULT_FROM_EMAIL=noreply@yourdomain.com
 ```
+[See: deployment/common-configuration.md#email-configuration] for detailed email configuration parameters.
 
 ## CORS & Frontend Integration
 ```bash

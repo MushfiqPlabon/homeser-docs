@@ -1,5 +1,59 @@
 # Backend Implementation Patterns
 
+**Last Updated**: 2025-12-03
+
+## Recent Pattern Updates
+
+### Service Layer Pattern (Updated: 2025-12-03)
+
+**Payment Validation Service**: Centralized validation logic extracted from views to service layer.
+
+```python
+# payments/services.py
+class PaymentValidationService:
+    """Service for payment validation and business rules"""
+    
+    @staticmethod
+    def validate_payment_creation(user, booking, payment_amount):
+        """Validate that a payment can be created for a booking"""
+        # Permission and amount validation
+        if user != booking.customer and user != booking.provider:
+            raise PermissionDenied("No permission to create payment")
+        
+        if booking.total_amount != payment_amount:
+            raise ValidationError("Payment amount mismatch")
+        
+        return True
+    
+    @staticmethod
+    def validate_refund_request(payment, refund_amount):
+        """Validate that a refund can be initiated"""
+        # Status, amount, and boundary validation
+        if payment.status != "completed":
+            raise ValidationError("Can only refund completed payments")
+        
+        # Additional validation logic...
+        return True
+
+# Usage in views
+from .services import payment_validation_service
+
+def perform_create(self, serializer):
+    booking = serializer.validated_data["booking"]
+    payment_amount = serializer.validated_data["amount"]
+    
+    # Delegate validation to service layer
+    payment_validation_service.validate_payment_creation(
+        self.request.user, booking, payment_amount
+    )
+```
+
+**Benefits**:
+- Thin controllers (views)
+- Testable business logic
+- Reusable validation across multiple endpoints
+- Single source of truth for business rules
+
 This document describes the common implementation patterns used throughout the HomeSer backend, focusing on the Django/DRF architecture and service-oriented design.
 
 ## Overview

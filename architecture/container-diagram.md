@@ -8,8 +8,8 @@ The system consists of two main applications (frontend and backend) that interac
 
 ## Main Application Containers
 
-### HomeSer Backend (Django/DRF)
-- **Technology**: Django 5.2.8, Django REST Framework 3.16.1, Python 3.13
+### HomeSer Backend (Django/DRF + ASGI)
+- **Technology**: Django 5.2.8, Django REST Framework 3.16.1, Python 3.13, Channels, Uvicorn
 - **Responsibility**: 
   - API endpoints for all business functionality
   - Authentication and authorization

@@ -1,94 +1,109 @@
 # Known Security Vulnerabilities
 
-This document details known security vulnerabilities in the HomeSer service marketplace and their current status, remediation steps, and preventive measures.
+Last Updated: 2025-12-06
 
-## Overview
-
-This document catalogues both resolved and outstanding security vulnerabilities in the HomeSer system. It is regularly updated to reflect the current security posture and remediation efforts.
+This document details current security vulnerabilities identified in the HomeSer service marketplace.
 
 ## Critical Vulnerabilities
 
-### 1. Frontend Authentication Store Missing Imports
-- **Status**: **HIGH - PENDING FIX**
-- **Description**: The `authStore.jsx` file is missing imports for `supabase` and `hasSupabaseCredentials` variables, causing potential runtime errors
-- **Severity**: High (CVSS 7.5)
-- **Impact**: Authentication failures and potential security bypasses
-- **Location**: `homeser-frontend-react/src/stores/authStore.jsx`
-- **Affected Systems**: Frontend authentication system
+### 1. Race Condition in Booking Creation
+- **Status**: **IDENTIFIED - NOT FIXED**
+- **Severity**: Critical (CVSS 8.1)
+- **Description**: Concurrent booking requests can bypass availability checks and create overlapping bookings
+- **Location**: `bookings/views.py` - `BookingViewSet.perform_create()`
+- **Impact**: Double-booking scenarios, customer dissatisfaction, provider conflicts
+- **Technical Details**: `select_for_update()` locks Availability table but not actual booking time slots
+- **Recommended Fix**: Lock booking time range using `select_for_update()` on Booking table with time range filter
+
+### 2. Missing Transaction Rollback in Payment Webhook
+- **Status**: **IDENTIFIED - NOT FIXED**
+- **Severity**: Critical (CVSS 7.8)
+- **Description**: Payment webhook processing lacks atomic transaction wrapper
+- **Location**: `payments/views.py` - `webhook()` method
+- **Impact**: Inconsistent payment states, potential financial discrepancies
+- **Recommended Fix**: Wrap entire webhook handler in `@transaction.atomic` decorator
+
+### 3. Token Storage Key Mismatch
+- **Status**: **IDENTIFIED - NOT FIXED**
+- **Severity**: Critical (CVSS 7.5)
+- **Description**: Frontend stores token as "token" but API client retrieves "access_token"
+- **Location**: `authStore.jsx` vs `utils/api.js`
+- **Impact**: Authentication failures, broken API calls after login
+- **Recommended Fix**: Standardize to single key name across both files
 
 ## High Severity Vulnerabilities
 
-### 3. Missing Rate Limiting on Authentication Endpoints
-- **Status**: **PENDING IMPLEMENTATION**
-- **Description**: Authentication endpoints lack proper rate limiting, making them vulnerable to brute force attacks
-- **Severity**: High (CVSS 7.1)
-- **Impact**: Potential account takeover through credential stuffing
-- **Location**: `/api/accounts/login/`, `/api/accounts/register/`
-- **Recommended Fix**: Implement Django REST Framework throttling on authentication endpoints
+### 4. Supabase Sync Failures in Django Signals
+- **Status**: **IDENTIFIED - NOT FIXED**
+- **Severity**: High (CVSS 7.2)
+- **Description**: Signal handlers call Supabase sync without exception handling
+- **Location**: `bookings/signals.py`
+- **Impact**: Booking creation failures if Supabase unavailable
+- **Recommended Fix**: Wrap sync calls in try-except blocks within signals
 
-### 4. Webhook Security Gaps in Payment System
-- **Status**: **REVIEW IN PROGRESS**
-- **Description**: Payment webhook endpoint may be vulnerable to unauthorized access without proper validation
-- **Severity**: High (CVSS 7.4)
-- **Impact**: Potential for fraudulent payment status updates
-- **Location**: Payment verification endpoint
-- **Current Mitigation**: SSLCommerz signature validation implemented
+### 5. Missing Database Locking in Availability Checker
+- **Status**: **IDENTIFIED - NOT FIXED**
+- **Severity**: High (CVSS 7.1)
+- **Description**: Conflict checking lacks database locking between check and create
+- **Location**: `bookings/availability_checker.py` - `check_booking_conflicts()`
+- **Impact**: Race condition leading to double bookings
+- **Recommended Fix**: Use `select_for_update()` when checking conflicts
+
+### 6. Missing Webhook Replay Protection
+- **Status**: **IDENTIFIED - NOT FIXED**
+- **Severity**: High (CVSS 7.0)
+- **Description**: No deduplication for duplicate webhook deliveries from SSLCommerz
+- **Location**: `payments/views.py` - `webhook()`
+- **Impact**: Duplicate payment processing, incorrect status updates
+- **Recommended Fix**: Store and check processed webhook transaction IDs
+
+### 7. Payment Amount Validation Gap
+- **Status**: **IDENTIFIED - NOT FIXED**
+- **Severity**: High (CVSS 6.8)
+- **Description**: Payment creation doesn't verify amount matches booking total
+- **Location**: `payments/views.py` - `perform_create()`
+- **Impact**: Financial discrepancies, incorrect billing
+- **Recommended Fix**: Add validation comparing payment amount to booking.total_amount
 
 ## Medium Severity Vulnerabilities
 
-### 5. Token Storage Security in Frontend
-- **Status**: **REQUIRES ASSESSMENT**
-- **Description**: JWT tokens stored in localStorage which may be vulnerable to XSS attacks
+### 8. Frontend Auth Token Refresh Race Condition
+- **Status**: **IDENTIFIED - NOT FIXED**
+- **Severity**: Medium (CVSS 5.5)
+- **Description**: Multiple concurrent 401 responses trigger simultaneous token refresh attempts
+- **Location**: `utils/api.js` - response interceptor
+- **Impact**: Unnecessary API calls, potential token invalidation
+- **Recommended Fix**: Implement refresh request deduplication/queuing
+
+### 9. Booking Duration Validation Missing
+- **Status**: **IDENTIFIED - NOT FIXED**
 - **Severity**: Medium (CVSS 5.3)
-- **Impact**: Theft of authentication tokens through XSS
+- **Description**: No validation that duration field matches end_time - start_time
+- **Location**: `bookings/models.py` - `Booking` model
+- **Impact**: Inconsistent data, incorrect billing, scheduling conflicts
+- **Recommended Fix**: Add model clean() method to validate duration consistency
+
+### 10. Token Storage in localStorage
+- **Status**: **DOCUMENTED - ACCEPTED RISK**
+- **Severity**: Medium (CVSS 5.3)
+- **Description**: JWT tokens stored in localStorage vulnerable to XSS attacks
 - **Location**: Frontend token storage mechanism
-- **Mitigation**: Consider HTTP-only cookies for token storage
+- **Impact**: Token theft through XSS
+- **Mitigation**: Consider HTTP-only cookies for production
 
-### 6. Insufficient Input Sanitization
-- **Status**: **REQUIRES ASSESSMENT**
-- **Description**: Some API endpoints may lack comprehensive input sanitization
-- **Severity**: Medium (CVSS 5.8)
-- **Impact**: Potential for data integrity issues or injection attacks
-- **Location**: Multiple API endpoints
-- **Mitigation**: Comprehensive input validation and sanitization
+## Remediation Priority
 
-## Low Severity Vulnerabilities
+### Immediate (Before Production)
+1. Fix booking creation race condition (#1)
+2. Fix token storage key mismatch (#3)
+3. Add transaction atomic to payment webhook (#2)
+4. Add payment amount validation (#7)
+5. Implement webhook replay protection (#6)
 
-### 7. Debug Mode Enabled in Production Configurations
-- **Status**: **DOCUMENTED FOR AWARENESS**
-- **Description**: DEBUG mode may be enabled in environment files, exposing sensitive information
-- **Severity**: Low (CVSS 3.7)
-- **Impact**: Information disclosure in error messages
-- **Mitigation**: Ensure DEBUG is disabled in production
-
-## Remediation Status
-
-### Immediate Actions Required
-1. **Fix missing imports** in authStore.jsx
-2. **Implement rate limiting** on authentication endpoints
-
-### Planned Remediation
-1. **Implement comprehensive** input validation
-2. **Evaluate token storage** alternatives
-
-### Current Mitigations
-1. **SSLCommerz signature validation** for webhook security
-2. **Django's built-in security** for SQL injection prevention
-3. **CORS configuration** for cross-origin protection
-
-## Verification and Validation
-
-### Testing Procedures
-- After remediation, test authentication functionality
-- Verify all API endpoints work as expected
-- Ensure real-time features continue to function
-- Test fallback mechanisms when Supabase unavailable
-
-### Monitoring Requirements
-- Monitor authentication failure rates
-- Track unusual access patterns
-- Monitor for credential stuffing attempts
-- Log and alert on security-related events
+### High Priority (Current Sprint)
+6. Add error handling to Supabase sync (#4)
+7. Add locking to availability checker (#5)
+8. Fix auth token refresh race condition (#8)
 
 ## Related Documentation
 
@@ -96,17 +111,3 @@ This document catalogues both resolved and outstanding security vulnerabilities 
 - [See: security/authentication-system.md]
 - [See: deployment/environment-configs.md]
 - [See: api/authentication-flow.md]
-
-## Security Assessment Schedule
-
-- **Daily**: Monitor authentication logs for suspicious activity
-- **Weekly**: Review security configuration and environment variables
-- **Monthly**: Conduct security assessment and vulnerability scans
-- **Quarterly**: Comprehensive security audit and penetration testing
-
-## Contact Information
-
-For security-related issues:
-- **Emergency contact**: Follow incident response procedures
-- **Security team**: Include security team in remediation efforts
-- **Vulnerability disclosure**: Use proper disclosure channels

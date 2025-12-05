@@ -9,38 +9,19 @@ The HomeSer performance strategy encompasses multiple layers including applicati
 ## Caching Strategies
 
 ### Multi-Level Caching Architecture
-The system implements a hierarchical caching approach with multiple layers:
+The system implements a strategic hierarchical caching approach with multiple layers for optimal performance:
 
-**Level 1: Application Cache (Redis)**
-- **Purpose**: High-speed data access for frequently requested information
-- **Data Types**: User sessions, API responses, computed values
-- **TTL Strategy**: 
-  - 5-minute TTL for dynamic data (e.g., booking availability)
-  - 15-minute TTL for semi-static data (e.g., service listings)
-  - 30-minute TTL for static reference data (e.g., categories)
-  - 24-hour TTL for rarely changing data (e.g., system settings)
+**Strategic Approach**: Implement multi-level caching to optimize performance while managing resource constraints:
+- **Application Cache (Redis)**: High-speed data access for frequently requested information
+- **Database Cache**: Reduce database load through query optimization
+- **API Response Cache**: Reduce processing through response caching
+- **Frontend Cache (React Query)**: Client-side caching and optimistic updates
 
-**Level 2: Database Cache**
-- **Purpose**: Reduce database load through query optimization
-- **Implementation**: Django's select_related and prefetch_related
-- **Target**: Complex queries with multiple joins and relationships
-
-**Level 3: API Response Cache**
-- **Purpose**: Cache entire API responses to reduce processing
-- **Implementation**: DRF's cache decorators and custom caching
-- **Scope**: Public API endpoints and expensive operations
-
-**Level 4: Frontend Cache (React Query)**
-- **Purpose**: Client-side caching and optimistic updates
-- **Implementation**: React Query with configurable cache times
-- **Benefits**: Reduced API calls and improved perceived performance
+**Implementation Details**: For specific implementation details, TTL strategies, and technical configuration, see performance/caching-strategy.md
 
 ### Intelligent Caching with O(1) Operations
-For the intelligent provider ranking system:
-- **Purpose**: O(1) cached provider ranking calculations
-- **Implementation**: Redis caching with 30-minute TTL
-- **Technology**: Uses numpy, polars, and scikit-learn for efficient calculations
-- **Data**: Geospatial calculations and multi-factor scoring
+**Strategic Approach**: Implement O(1) cached operations for computationally expensive processes like provider ranking.
+**Implementation Details**: For specific implementation details of intelligent provider ranking caching, see performance/caching-strategy.md
 
 ## API Performance Optimization
 
@@ -58,12 +39,8 @@ For the intelligent provider ranking system:
 - **Caching Headers**: Appropriate cache headers for different data types
 
 ### Rate Limiting and Load Management
-**Throttling Strategy**
-- **Anonymous Users**: 100 requests per hour (via DRF throttling)
-- **Authenticated Users**: 1000 requests per hour (via DRF throttling)
-- **Sensitive Endpoints**: More restrictive limits (via DRF throttling)
-- **Custom Rules**: Endpoint-specific rate limiting through DRF throttling
-- **Planned Enhancement**: `django-ratelimit` package installed but not yet implemented on authentication endpoints to prevent brute force attacks
+[See: security/security-measures.md#rate-limiting]
+[See: deployment/common-configuration.md#rate-limiting]
 
 ## Database Performance
 
@@ -126,7 +103,7 @@ For the intelligent provider ranking system:
 **Event Filtering**
 - **Selective Subscriptions**: Subscribe only to relevant events
 - **Server-side Filtering**: Filter events before sending to clients
-- **Rate Limiting**: Limit the rate of real-time updates
+- **Rate Limiting**: [See: security/security-measures.md#rate-limiting]
 - **Data Compression**: Compress real-time data when beneficial
 
 ## Resource Optimization for Free Tier
@@ -210,7 +187,8 @@ For the intelligent provider ranking system:
 
 ## Related Documentation
 
-- [See: performance/caching-strategy.md]
+- [See: performance/caching-strategy.md] - Detailed caching implementation
+- [See: security/security-measures.md] - Security considerations for performance
 - [See: performance/monitoring.md]
 - [See: api/common-patterns.md#performance-patterns]
 - [See: patterns/backend-patterns.md#performance]

@@ -8,37 +8,15 @@ The HomeSer security framework implements multiple layers of security controls a
 
 ## Authentication Security
 
-### JWT Token Security
-- **Token Signing**: HS256 algorithm with Django SECRET_KEY
-- **Token Rotation**: Refresh tokens are single-use and rotated
-- **Blacklisting**: Refresh tokens are blacklisted after use
-- **Lifetime Configuration**: Configurable token lifetimes via environment variables
-- **Secure Storage**: Tokens stored securely in frontend (with considerations for localStorage vulnerabilities)
-
-### Multi-System Authentication
-- **Primary**: Django JWT for API authentication
-- **Secondary**: Supabase for real-time features
-- **Fallback**: Django-only authentication when Supabase unavailable
-- **Synchronization**: Consistent authentication state across systems
+[See: security/security-measures.md#authentication-security]
+[See: security/authentication-system.md]
 
 ## Authorization Security
 
 ### Role-Based Access Control (RBAC)
-- **User Types**: Customer, Provider, Admin roles
-- **Granular Permissions**: Custom permission classes and functions for specific actions
-- **Custom Permissions**:
-  - Service permissions: `view_own_services`, `add_own_services`, `change_own_services`, `delete_own_services`
-  - Booking permissions: `view_provided_bookings`, `change_provided_bookings`, `view_own_bookings`, `change_own_bookings`
-- **Object-Level Permissions**: Django Guardian for fine-grained access control
-  - Per-object permission checks: `user.has_perm('bookings.view_booking', booking)`
-  - Service-specific object permissions: `user.has_perm('services.change_service', service)`
-  - Dynamic permission evaluation based on object ownership
-- **Authorization Functions**:
-  - `can_manage_service(user, service)` - Check if user can manage a specific service
-  - `can_manage_booking(user, booking)` - Check if user can manage a specific booking
-- **Decorator Pattern**: Custom decorators for role-based access control
-- **Permission Assignment**: Role-based permission assignment via `assign_role_permissions()` function
-- **Permission Inheritance**: Advanced role + object permission combination for complex scenarios
+- **Strategic Approach**: Implement multi-tier role-based access control with customer, provider, and admin roles
+- **Granular Permissions**: Use custom permission classes and object-level permissions for fine-grained access control
+- **Implementation Details**: For specific implementation details, see security-measures.md and authentication-system.md
 
 ### Access Validation
 - **Ownership Checks**: Verify user ownership of resources
@@ -83,16 +61,12 @@ The HomeSer security framework implements multiple layers of security controls a
 ## API Security
 
 ### Rate Limiting
-- **Anonymous Users**: 100 requests per hour (via DRF throttling)
-- **Authenticated Users**: 1000 requests per hour (via DRF throttling)
-- **Special Endpoints**: More restrictive limits on sensitive endpoints (via DRF throttling)
-- **Custom Rules**: Endpoint-specific rate limiting through DRF throttling
-- **Planned Enhancement**: `django-ratelimit` package installed but not yet implemented on authentication endpoints to prevent brute force attacks (addresses security vulnerability noted in vulnerabilities.md)
+- **Strategic Approach**: Implement comprehensive rate limiting to prevent abuse and brute force attacks
+- **Standard Limits**: Use configured limits for anonymous and authenticated users
+- **Implementation Details**: For specific implementation details, see security-measures.md and performance/common-strategies.md
 
 ### CORS Configuration
-- **Frontend Domain**: Only allow specified frontend domains
-- **HTTP Methods**: Restrict allowed HTTP methods
-- **Headers**: Control allowed headers and credentials
+[See: deployment/common-configuration.md#cors-configuration]
 
 ## Database Security
 
@@ -117,29 +91,18 @@ The HomeSer security framework implements multiple layers of security controls a
 ## Communication Security
 
 ### HTTPS Enforcement
-- **Redirect Configuration**: SSL redirect configurable via environment (default: False/non-production, should be True in production)
-- **Secure Headers**: Implement security headers for all responses
-- **Cookie Security**: Configurable secure cookies (default: False in development, should be True in production)
+- **Strategic Approach**: Enforce HTTPS across all communications with proper redirect configuration and secure cookie handling
+- **Implementation Details**: For specific implementation details, see security-measures.md
 
 ### Security Headers Configuration
-- **X-Frame-Options**: DENY - Prevent clickjacking attacks
-- **X-Content-Type-Options**: nosniff - Prevent MIME-type confusion
-- **X-XSS-Protection**: 1; mode=block - Browser XSS protection
-- **HSTS Configuration**:
-  - `SECURE_HSTS_SECONDS`: 31536000 seconds (1 year) - HTTP Strict Transport Security max age
-  - `SECURE_HSTS_INCLUDE_SUBDOMAINS`: True - Apply HSTS to all subdomains
-  - `SECURE_HSTS_PRELOAD`: True - Allow inclusion in browser HSTS preload lists
-- **Cookie Security**:
-  - `SESSION_COOKIE_SECURE`: Configurable (default: False, enable in production) - Secure session cookies
-  - `CSRF_COOKIE_SECURE`: Configurable (default: False, enable in production) - Secure CSRF cookies
+- **Strategic Approach**: Implement comprehensive security headers to prevent common web attacks
+- **Implementation Details**: For specific configuration details, see security-measures.md
 
 ## Session Management
 
 ### Token Management
-- **Short-Lived Access Tokens**: Minimize exposure window
-- **Longer-Lived Refresh Tokens**: Secure rotation mechanism
-- **Token Blacklisting**: Prevent replay attacks
-- **Automatic Refresh**: Seamless token renewal for users
+- **Strategic Approach**: Implement secure token management with appropriate lifetimes and rotation mechanisms
+- **Implementation Details**: For specific implementation details, see security-measures.md
 
 ### Session Security
 - **Concurrent Sessions**: Controls on multiple simultaneous sessions
@@ -201,7 +164,9 @@ The HomeSer security framework implements multiple layers of security controls a
 
 ## Related Documentation
 
-- [See: security/authentication-system.md]
+- [See: security/security-measures.md] - Detailed implementation of security measures
+- [See: security/authentication-system.md] - Authentication system architecture
+- [See: performance/common-strategies.md] - Performance-related security considerations
 - [See: api/common-patterns.md#security-patterns]
 - [See: deployment/environment-configs.md]
 - [See: references/glossary.md#security]

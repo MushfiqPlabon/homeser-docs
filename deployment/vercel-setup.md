@@ -94,24 +94,28 @@ The frontend is deployed using the `vercel.json` configuration file in the `home
 
 ## Backend Deployment Configuration
 
-### WSGI Application Setup
-The Django backend is deployed as a WSGI application using Gunicorn, configured via the `Procfile` in the `homeser-backend-drf` directory:
+### ASGI Application Setup
+The Django backend is deployed as an ASGI application using Channels and Uvicorn, configured via `vercel.json`:
 
-```
-web: gunicorn homeser.wsgi --workers 2 --threads 4 --timeout 60
+```json
+{
+  "builds": [{"src": "homeser/asgi.py", "use": "@vercel/python"}],
+  "routes": [{"src": "/(.*)", "dest": "homeser/asgi.py"}]
+}
 ```
 
 ### Python Runtime Configuration
 - **Runtime Version**: Python 3.13 (matches development environment)
-- **WSGI Server**: Gunicorn with 2 workers and 4 threads per worker
+- **ASGI Server**: Uvicorn with Channels for WebSocket support
 - **Timeout**: 60 seconds maximum request handling time
 - **Package Management**: Uses `uv` for dependency management
-- **Deployment Type**: Traditional web server deployment (not serverless)
+- **Deployment Type**: Serverless functions with ASGI support
 
 ### API Routing
-- **API Gateway**: All `/api/*` routes handled by Django application
+- **API Gateway**: All `/api/*` routes handled by Django ASGI application
 - **Health Checks**: Available at `/health` endpoint for monitoring
-- **Static Files**: Collected and served by the WSGI server
+- **Static Files**: Collected and served by the ASGI server
+- **WebSocket Support**: Ready for real-time features via Channels
 
 ## Environment Configuration
 
@@ -133,19 +137,10 @@ SECRET_KEY=your-secret-key
 DEBUG=False
 FRONTEND_URL=https://your-frontend-domain.vercel.app
 ALLOWED_HOSTS=.vercel.app, homeser-backend-xyz.vercel.app
-DATABASE_URL=postgresql://user:pass@supabase-project.supabase.co:5432/your-db
-REDIS_URL=redis://upstash-redis-url
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-service-role-key
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
-SSLCOMMERZ_STORE_ID=your-store-id
-SSLCOMMERZ_STORE_PASS=your-store-pass
-SSLCOMMERZ_IS_SANDBOX=true
-EMAIL_HOST_USER=your-smtp-user
-EMAIL_HOST_PASSWORD=your-smtp-password
+DATABASE_URL=postgresql://user:pass@host:6543/db
 ```
+[See: deployment/common-configuration.md#database-configuration] for DATABASE_URL format details
+[See: deployment/environment-configs.md] for complete environment variable reference
 
 ### Environment Variable Security
 - **Secret Management**: Use Vercel's secure environment variable storage

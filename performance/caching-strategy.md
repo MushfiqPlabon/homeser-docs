@@ -34,19 +34,7 @@ The HomeSer caching strategy implements a multi-layered approach with different 
 ## Redis Cache Strategy
 
 ### Cache Configuration
-```python
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDIS_URL'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'KEY_PREFIX': 'homeser',
-        'TIMEOUT': 300,  # 5 minutes default
-    }
-}
-```
+[See: deployment/common-configuration.md#redis-settings] for complete Redis configuration details.
 
 ### Cache Key Strategy
 - **Prefix Organization**: `homeser:{category}:{identifier}:{parameters}`
@@ -290,7 +278,8 @@ const mutation = useMutation({
 
 ## Related Documentation
 
-- [See: performance/common-strategies.md]
+- [See: performance/common-strategies.md] - Strategic performance approach and cross-cutting concerns
+- [See: security/security-measures.md] - Security considerations for caching
 - [See: performance/monitoring.md]
 - [See: architecture/component-diagram.md]
 - [See: api/common-patterns.md#caching-strategies]

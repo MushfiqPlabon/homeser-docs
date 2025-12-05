@@ -30,24 +30,56 @@ All configurations follow the naming convention: `{CATEGORY}_{SETTING_NAME}`
 ## Database Configuration
 
 ### Supabase PostgreSQL Settings
+
+**Primary Method: DATABASE_URL**
 ```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', default='5432'),
-        'OPTIONS': {
-            'sslmode': 'require',
-            'pool': {
-                'min_size': config('DB_MIN_CONN', cast=int, default=1),
-                'max_size': config('DB_MAX_CONN', cast=int, default=20),
-                'timeout': config('DB_CONN_TIMEOUT', cast=int, default=30),
+DATABASE_URL = config("DATABASE_URL", default=None)
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+    DATABASES["default"]["OPTIONS"] = {
+        "connect_timeout": 10,
+        "options": "-c statement_timeout=30000",
+    }
+```
+
+**Format:** `postgresql://USER:PASSWORD@HOST:PORT/DATABASE`
+**Example:** `postgresql://postgres.xxx:pass@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres`
+
+**Important:** Use Supabase connection pooler port (6543), not direct port (5432)
+
+**Fallback Method: Individual Settings**
+```python
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST'),
+            'PORT': config('DB_PORT', default='6543'),
+            'CONN_MAX_AGE': 600,
+            'CONN_HEALTH_CHECKS': True,
+            'OPTIONS': {
+                'connect_timeout': 10,
+                'options': '-c statement_timeout=30000',
             }
-        },
-        'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', cast=int, default=600),
+        }
+    }
+```
+
+### Connection Pooling
+- **CONN_MAX_AGE**: 600 seconds - connection reuse duration
+- **CONN_HEALTH_CHECKS**: True - validates connection before reuse
+- **connect_timeout**: 10 seconds - connection establishment timeout
+- **statement_timeout**: 30000ms - query execution timeout
         'TEST': {
             'NAME': config('DB_TEST_NAME', default='test_homeser'),
         }

@@ -21,7 +21,7 @@ HomeSer is a service marketplace that connects service providers with customers 
 
 ## System Boundaries
 
-### HomeSer Backend (Django/DRF)
+### HomeSer Backend (Django/DRF + ASGI)
 - User authentication and authorization
 - Service catalog management
 - Booking system and availability management

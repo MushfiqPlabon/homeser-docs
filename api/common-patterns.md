@@ -8,23 +8,8 @@ The HomeSer API follows consistent patterns across all endpoints to ensure predi
 
 ## Authentication Patterns
 
-### JWT Token Authentication
-All authenticated endpoints require a JWT token in the Authorization header:
-```
-Authorization: Bearer {jwt_token}
-```
-
-### Token Refresh Flow
-When access tokens expire, the system automatically refreshes them:
-1. 401 Unauthorized response triggers refresh attempt
-2. Refresh token used to obtain new access token
-3. Original request is retried with new token
-
-### Dual Authentication Support
-The system supports both Supabase and Django authentication:
-- Primary authentication through Django JWT
-- Supabase fallback when available
-- Graceful degradation when Supabase unavailable
+[See: security/security-measures.md#authentication-security]
+[See: api/authentication-flow.md]
 
 ## API Endpoint Design
 
@@ -67,10 +52,7 @@ Example: `/api/v1/bookings/123/cancel/`
 - Support date ranges: `/api/bookings/?start_date=2023-01-01&end_date=2023-01-31`
 
 ### Pagination
-- Default page size: 20 items
-- Custom page size: `/api/services/?page_size=50`
-- Next/previous page indicators in response
-- Standard pagination response format
+[See: deployment/common-configuration.md#pagination-configuration] for pagination settings and limits.
 
 ### Search and Sorting
 - Search: `/api/services/services/?search=keyword` (for services) or `/api/services/intelligent-search/` (for intelligent ranking)
@@ -242,9 +224,7 @@ Use PATCH method for partial resource updates:
 ## Security Patterns
 
 ### Rate Limiting
-- Limit requests per hour per user/IP
-- Use different limit tiers (anon vs authenticated)
-- Implement backoff strategies for automated systems
+[See: security/security-measures.md#rate-limiting]
 
 ### Input Validation
 - Server-side validation for all inputs

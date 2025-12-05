@@ -29,6 +29,59 @@ The HomeSer system implements a multi-layered security approach that includes au
 - **Automatic Salting**: Automatic salt generation for each password
 - **Reset Mechanism**: Secure password reset with token validation
 
+### Rate Limiting (Updated: 2025-12-03)
+
+**Authentication Endpoint Rate Limits:**
+Strict rate limiting enforced on all authentication endpoints to prevent brute force attacks and abuse:
+
+- **Login Endpoint** (`/api/accounts/login/`): 5 attempts per minute
+  - Prevents brute force password attacks
+  - Uses `LoginRateThrottle` class
+  
+- **Registration Endpoint** (`/api/accounts/register/`): 3 attempts per hour
+  - Prevents spam account creation
+  - Uses `RegisterRateThrottle` class
+  
+- **Email Verification** (`/api/accounts/send-verification/`): 5 requests per hour
+  - Prevents email verification abuse
+  - Uses `EmailVerificationRateThrottle` class
+
+**General Rate Limits:**
+- **Anonymous Users**: 100 requests per hour
+- **Authenticated Users**: 1000 requests per hour
+
+**Implementation:**
+Rate limiting is implemented using Django REST Framework's throttling system with Redis backend for production. Custom throttle classes are defined in `accounts/throttles.py` and configured in `homeser/settings.py`.
+
+### Webhook Authentication (Updated: 2025-12-03)
+
+**Payment Gateway Webhook Security:**
+All payment webhook endpoints are protected against unauthorized access and replay attacks:
+
+- **Signature Verification**: Webhooks from SSLCommerz are verified using MD5(store_password + verify_key)
+  - Prevents unauthorized payment status modifications
+  - Validates webhook authenticity before processing
+  
+- **Transaction Validation**: Each webhook must reference an existing transaction
+  - Prevents creation of fake payments
+  - Protects against replay attacks
+  
+- **Comprehensive Logging**: All webhook attempts are logged with security auditing
+  - Failed verification attempts are logged as potential security threats
+  - Successful verifications are tracked for audit purposes
+
+**Implementation:**
+Webhook signature verification is implemented in `payments/services.py` using the `verify_webhook_signature()` method. The webhook endpoint validates signatures before processing any payment status updates.
+
+### Code Quality & Security Improvements (Updated: 2025-12-03)
+
+**Recent Security Enhancements:**
+1. **Runtime Error Fixes**: Fixed missing imports in authStore.jsx preventing authentication crashes
+2. **Test Infrastructure**: Added create_payment method to test base class for comprehensive payment testing
+3. **Validation Service**: Extracted PaymentValidationService to centralize payment validation logic
+4. **Dead Code Removal**: Removed unused components (RefundModal, ImageUpload, ReviewForm) reducing attack surface
+5. **Error Handling**: Created ErrorState component for consistent, secure error display across the application
+
 ## Authorization Security
 
 ### Role-Based Access Control (RBAC)
@@ -181,10 +234,11 @@ The HomeSer system implements a multi-layered security approach that includes au
 
 ## Related Documentation
 
-- [See: security/common-measures.md]
+- [See: security/common-measures.md] - Strategic security measures overview
 - [See: security/authentication-system.md]
 - [See: api/common-patterns.md#security-patterns]
 - [See: deployment/common-configuration.md]
+- [See: performance/common-strategies.md] - Performance considerations for security
 - [See: references/glossary.md#security]
 
 ## Validation and Testing

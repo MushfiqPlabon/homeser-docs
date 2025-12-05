@@ -1,45 +1,19 @@
 # Authentication Flow API
 
-This document describes the authentication flow patterns in the HomeSer service marketplace, including the dual authentication system using both Supabase and Django.
+This document describes the authentication API endpoints and request/response flows.
 
 ## Overview
 
-The HomeSer authentication system implements a dual approach combining Supabase for real-time capabilities and Django for granular control. This provides both the real-time features needed for updates and the security controls required for business logic.
+[See: security/authentication-system.md] for architecture and dual authentication system details.
 
-## Authentication Architecture
-
-### Dual System Design
-- **Primary**: Django JWT authentication for API requests
-- **Secondary**: Supabase authentication for real-time features
-- **Fallback**: Django-only authentication when Supabase unavailable
-- **Synchronization**: Token and session synchronization between systems
-
-### User Types and Roles
+## User Types and Roles
 - **Customer**: Standard user for booking services
 - **Provider**: Service provider with additional service management capabilities
 - **Admin**: Full system access for management and oversight
 
 ## Authentication Flow
 
-### User Registration
-1. User submits registration request to Django endpoint
-2. Django creates user in local database
-3. If Supabase available, create user in Supabase
-4. Send email verification link (both systems)
-5. Return initial tokens for Django system
-
-### User Login
-1. User submits credentials to `/api/accounts/login/`
-2. Django validates credentials and creates JWT tokens
-3. If Supabase available, create Supabase session
-4. Update user profile with session info
-5. Return both Django and Supabase session info
-
-### Token Management
-- **Access Token**: Short-lived (configurable minutes), for API requests
-- **Refresh Token**: Longer-lived (configurable days), for token renewal
-- **Token Rotation**: Refresh tokens are single-use and rotated on each refresh
-- **Blacklisting**: Used for refresh token security
+[See: security/authentication-system.md#authentication-flows] for detailed flow descriptions.
 
 ## API Endpoints
 

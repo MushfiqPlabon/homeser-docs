@@ -16,6 +16,7 @@ The real-time system provides live updates for critical events like booking stat
 
 ### Django-Supabase Synchronization
 - Django models automatically synced to Supabase using Django signals
+- Supabase client is lazy-loaded to prevent Django startup blocking
 - Booking model: Synced via post_save/post_delete signals
 - Availability model: Synced via post_save signals
 - Sync operations: INSERT (new), UPDATE (changes), DELETE (removal)
@@ -146,7 +147,7 @@ const { payments, loading, error } = useRealTimePayments(userId);
 - **Network Issues**: Automatic reconnection with exponential backoff
 - **Authentication Errors**: Refresh authentication and reconnect
 - **Subscription Errors**: Retry subscription with backoff
-- **Rate Limiting**: Implement backoff and retry logic
+- **Rate Limiting**: [See: security/security-measures.md#rate-limiting]
 
 ### Event Processing
 - Validate event structure before processing
@@ -196,6 +197,7 @@ const { payments, loading, error } = useRealTimePayments(userId);
 ## Implementation Notes
 
 - Real-time connections use Supabase client library with custom reconnection logic
+- Supabase client is lazy-loaded via `get_supabase_client()` to prevent Django startup blocking
 - The system includes mock implementation for graceful degradation when Supabase unavailable
 - Event payloads include versioning for future compatibility
 - Connection monitoring helps identify and resolve connectivity issues quickly
