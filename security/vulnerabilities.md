@@ -1,35 +1,34 @@
 # Known Security Vulnerabilities
 
-Last Updated: 2025-12-06
+Last Updated: 2025-12-06 04:54 AM
 
 This document details current security vulnerabilities identified in the HomeSer service marketplace.
 
 ## Critical Vulnerabilities
 
 ### 1. Race Condition in Booking Creation
-- **Status**: **IDENTIFIED - NOT FIXED**
+- **Status**: **FIXED - 2025-12-06**
 - **Severity**: Critical (CVSS 8.1)
 - **Description**: Concurrent booking requests can bypass availability checks and create overlapping bookings
 - **Location**: `bookings/views.py` - `BookingViewSet.perform_create()`
 - **Impact**: Double-booking scenarios, customer dissatisfaction, provider conflicts
-- **Technical Details**: `select_for_update()` locks Availability table but not actual booking time slots
-- **Recommended Fix**: Lock booking time range using `select_for_update()` on Booking table with time range filter
+- **Fix Applied**: Added `select_for_update()` on conflicting bookings with proper time range locking
 
 ### 2. Missing Transaction Rollback in Payment Webhook
-- **Status**: **IDENTIFIED - NOT FIXED**
+- **Status**: **FIXED - 2025-12-06**
 - **Severity**: Critical (CVSS 7.8)
 - **Description**: Payment webhook processing lacks atomic transaction wrapper
 - **Location**: `payments/views.py` - `webhook()` method
 - **Impact**: Inconsistent payment states, potential financial discrepancies
-- **Recommended Fix**: Wrap entire webhook handler in `@transaction.atomic` decorator
+- **Fix Applied**: Added `@transaction.atomic` decorator to webhook method
 
 ### 3. Token Storage Key Mismatch
-- **Status**: **IDENTIFIED - NOT FIXED**
+- **Status**: **FIXED - 2025-12-06**
 - **Severity**: Critical (CVSS 7.5)
 - **Description**: Frontend stores token as "token" but API client retrieves "access_token"
 - **Location**: `authStore.jsx` vs `utils/api.js`
 - **Impact**: Authentication failures, broken API calls after login
-- **Recommended Fix**: Standardize to single key name across both files
+- **Fix Applied**: Standardized all localStorage calls to use "access_token" key
 
 ## High Severity Vulnerabilities
 
@@ -93,10 +92,12 @@ This document details current security vulnerabilities identified in the HomeSer
 
 ## Remediation Priority
 
+### Completed (2025-12-06)
+✅ 1. Fixed booking creation race condition (#1)
+✅ 2. Fixed token storage key mismatch (#3)
+✅ 3. Added transaction atomic to payment webhook (#2)
+
 ### Immediate (Before Production)
-1. Fix booking creation race condition (#1)
-2. Fix token storage key mismatch (#3)
-3. Add transaction atomic to payment webhook (#2)
 4. Add payment amount validation (#7)
 5. Implement webhook replay protection (#6)
 
