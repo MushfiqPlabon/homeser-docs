@@ -52,10 +52,11 @@ The booking flow enables customers to search for services, check provider availa
   "provider": 456,
   "booking_date": "2025-12-25T10:00:00Z",
   "start_time": "2025-12-25T10:00:00Z",
-  "end_time": "2025-12-25T12:00:00Z",
+  "duration": 120,
   "customer_notes": "Additional instructions"
 }
 ```
+- **Note**: `end_time` is optional and set when service completes. Use `duration` (in minutes) for scheduling.
 - **Response**: Created booking object with status and payment info
 - **Authentication**: Required
 - **Authorization**: Customer role

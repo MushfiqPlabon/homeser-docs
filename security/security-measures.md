@@ -76,7 +76,7 @@ Webhook signature verification is implemented in `payments/services.py` using th
 ### Code Quality & Security Improvements (Updated: 2025-12-03)
 
 **Recent Security Enhancements:**
-1. **Runtime Error Fixes**: Fixed missing imports in authStore.jsx preventing authentication crashes
+1. **Runtime Error Fixes**: Resolved authentication crashes and import issues in authStore.jsx
 2. **Test Infrastructure**: Added create_payment method to test base class for comprehensive payment testing
 3. **Validation Service**: Extracted PaymentValidationService to centralize payment validation logic
 4. **Dead Code Removal**: Removed unused components (RefundModal, ImageUpload, ReviewForm) reducing attack surface
@@ -223,6 +223,26 @@ Webhook signature verification is implemented in `payments/services.py` using th
 - **Security Scanning**: Regular security scanning of dependencies
 - **Minimal Dependencies**: Keep dependencies to a minimum
 - **Trusted Sources**: Only use well-maintained, trusted libraries
+
+## Concurrency Protection
+
+### Database Locking
+- **Implementation**: `select_for_update()` on critical operations
+- **Protected Operations**:
+  - Booking creation conflict checking
+  - Availability slot checking
+  - Payment webhook processing
+- **Benefits**: Prevents race conditions and double-booking scenarios
+
+### Token Refresh Mutex
+- **Implementation**: Mutex pattern with subscriber queue in frontend
+- **Location**: `utils/api.js` response interceptor
+- **Benefits**: Prevents multiple simultaneous token refresh requests
+
+### Error Handling
+- **Supabase Sync**: Try-catch blocks in all signal handlers
+- **Graceful Degradation**: Operations continue even if real-time sync fails
+- **Logging**: Failed sync attempts logged for monitoring
 
 ## Incident Response Preparation
 

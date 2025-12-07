@@ -83,6 +83,13 @@ The payment flow enables customers to securely process payments for bookings thr
 - **Response**: Webhook processing status
 - **Authentication**: Public (server-to-server communication)
 - **Security**: SSLCommerz signature validation and transaction ID verification
+- **Webhook Validation Process**:
+  - Extract `verify_sign` and `verify_key` from webhook data
+  - Validate presence of verification parameters
+  - Verify signature using MD5(`SSLCOMMERZ_STORE_PASS` + `verify_key`)
+  - Compare computed signature with provided `verify_sign`
+  - Only process webhook if signature validation passes
+  - Implement replay protection using `webhook_processed_ids` JSONField
 
 ### Transaction History
 - **Method**: GET
@@ -153,6 +160,9 @@ The payment flow enables customers to securely process payments for bookings thr
 - SSLCommerz signature verification for callback authenticity
 - Rate limiting on payment endpoints to prevent abuse
 - Secure storage of SSLCommerz credentials in environment variables
+- Webhook replay protection using `webhook_processed_ids` JSONField to prevent duplicate processing
+- Signature verification using MD5(store_password + verify_key) for authenticating webhook requests
+- Validation of webhook transactions against existing database records before processing
 
 ## Refund Processing
 

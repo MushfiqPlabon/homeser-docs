@@ -190,8 +190,8 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('JWT_ACCESS_TOKEN_MINUTES', cast=int, default=15)),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('JWT_REFRESH_TOKEN_DAYS', cast=int, default=7)),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=config('JWT_ACCESS_TOKEN_LIFETIME_MINUTES', cast=int, default=15)),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=config('JWT_REFRESH_TOKEN_LIFETIME_DAYS', cast=int, default=7)),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
@@ -218,8 +218,8 @@ SIMPLE_JWT = {
 ```
 
 **JWT Configuration Parameters:**
-- `JWT_ACCESS_TOKEN_MINUTES`: Access token lifetime (default 15 minutes)
-- `JWT_REFRESH_TOKEN_DAYS`: Refresh token lifetime (default 7 days)
+- `JWT_ACCESS_TOKEN_LIFETIME_MINUTES`: Access token lifetime (default 15 minutes)
+- `JWT_REFRESH_TOKEN_LIFETIME_DAYS`: Refresh token lifetime (default 7 days)
 - `JWT_SIGNING_KEY`: JWT signing key (from Django SECRET_KEY)
 
 ## Third-Party Service Configuration

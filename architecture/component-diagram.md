@@ -42,6 +42,11 @@ The HomeSer system is built with a modular architecture where each Django app re
 - **Services**:
   - `bookings/services.py` - Booking validation and management
   - `bookings/availability_checker.py` - Availability calculation
+- **Real-time Integration**:
+  - `bookings/signals.py` - Django signal handlers for real-time synchronization to Supabase
+  - Pre-save tracking of status changes for notifications
+  - Post-save synchronization of booking changes to Supabase for real-time updates
+  - Post-delete synchronization to remove records from Supabase
 - **API Endpoints**:
   - Booking creation and management
   - Availability checking
@@ -188,6 +193,11 @@ Each component follows a service layer pattern:
 - Supabase PostgreSQL change subscriptions
 - Consistent subscription patterns across components
 - Client-side handling in frontend
+- Django-Supabase synchronization via signals in `bookings/signals.py`
+- Sync operations: INSERT, UPDATE, DELETE operations synchronized to Supabase in real-time
+- Error handling in sync operations to prevent failures from affecting core functionality
+- Status change tracking using pre-save signals
+- Notification triggers through Django signal system when booking statuses change
 
 ## Component-Specific Architecture
 
@@ -202,11 +212,13 @@ Each component follows a service layer pattern:
 - Checks against existing bookings
 - Handles complex time slot calculations
 
-### Real-time Integration Component (`lib/supabaseClient.js`)
+### Real-time Integration Component (`lib/supabaseClient.js` and `homeser/realtime_sync.py`)
 - Manages WebSocket connections to Supabase
 - Handles reconnection logic
 - Implements selective real-time updates
 - Manages connection status
+- Low-level synchronization via `homeser/realtime_sync.py` functions
+- Error logging for sync operations in `homeser/realtime_sync.py`
 
 ## Security Components
 

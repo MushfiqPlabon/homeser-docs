@@ -69,15 +69,15 @@ The HomeSer caching strategy implements a multi-layered approach with different 
 - **TTL**: 900 seconds (15 minutes)
 
 #### Extra Long-term Cache (30 minutes)
-- **Use Case**: Planned for computationally expensive operations
+- **Use Case**: For computationally expensive operations
 - **Examples**:
-  - Intelligent provider ranking calculations (currently hardcoded but could use this)
+  - Intelligent provider ranking calculations using numpy/polars/scikit-learn
   - Complex analytical results
   - Resource-intensive query results
 - **TTL**: 1800 seconds (30 minutes)
 - **Constant**: `CACHE_EXTRA_LONG` in `homeser/constants.py`
 
-*Note: Cache durations are defined in `homeser/constants.py` as CACHE_SHORT (5 min), CACHE_MEDIUM (10 min), CACHE_LONG (15 min), and CACHE_EXTRA_LONG (30 min). Currently the 30-minute cache is defined as a constant but may be directly hardcoded in some implementations.*
+*Note: Cache durations are defined in `homeser/constants.py` as CACHE_SHORT (5 min), CACHE_MEDIUM (10 min), CACHE_LONG (15 min), and CACHE_EXTRA_LONG (30 min). The intelligent provider ranking system specifically uses this 30-minute cache for O(1) cached calculations.*
 
 ## Specific Caching Implementations
 
@@ -99,11 +99,13 @@ The HomeSer caching strategy implements a multi-layered approach with different 
 **Special Implementation**: O(1) cached provider ranking using data science libraries
 - **Technology**: numpy, polars, scikit-learn for efficient calculations
 - **Algorithm**: Geospatial search with Haversine formula and multi-factor scoring
-- **TTL**: 1800 seconds (30 minutes) for cached ranking results
+- **TTL**: 1800 seconds (30 minutes) for cached ranking results using CACHE_EXTRA_LONG constant
 - **Caching Strategy**: Cache results of expensive ranking calculations
-- **Cache Key Format**: `search:{lat}:{lon}:{service_type}` where coordinates are rounded to 2 decimal places
+- **Cache Key Format**: `search:{lat:.2f}:{lon:.2f}:{service_type}` where coordinates are rounded to 2 decimal places
 - **Cache Bypass**: If cache fails, calculation continues without caching
 - **Library-First Implementation**: Uses external libraries as per RULES.md compliance
+- **Error Resilience**: Comprehensive error handling for invalid coordinates, database failures, and other extreme cases
+- **Extreme Case Handling**: Handles invalid coordinates, no providers found, database errors with safe defaults
 
 ### Session Caching
 **Implementation**: Redis-backed session storage

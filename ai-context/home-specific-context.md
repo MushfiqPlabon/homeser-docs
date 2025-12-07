@@ -100,7 +100,6 @@ This document provides AI assistants with specific context about the HomeSer pro
 ## HomeSer Technical Debt & Known Issues
 
 ### 1. Current Security Issues (Documented in vulnerability.md)
-- Missing import in authStore.jsx (supabase, hasSupabaseCredentials)
 - Webhook security gaps in payment system
 
 ### 2. Architecture Evolution Needs
@@ -140,7 +139,7 @@ This document provides AI assistants with specific context about the HomeSer pro
 
 ### Critical Backend Files:
 - `services/intelligence.py`: ML-based provider ranking (numpy/polars/scikit-learn)
-- `authStore.jsx`: Dual auth system implementation (may have missing imports)
+- `authStore.jsx`: Dual auth system implementation
 - `supabaseClient.js`: Real-time infrastructure (308 lines, complex)
 - `payments/views.py`: Needs refactoring, has business logic in wrong layer
 

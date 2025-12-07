@@ -195,6 +195,13 @@ Use PATCH method for partial resource updates:
   - Preserves original error details for debugging
   - Handles common error scenarios (permissions, validation, authentication, etc.)
   - Standardized error response format with status_code and error_details
+- **Specific Mappings**:
+  - Permission errors: "You do not have permission to perform this action"
+  - Resource not found: "The requested resource was not found"
+  - Validation errors: "Invalid request. Please check your input and try again"
+  - Authentication errors: "Authentication required. Please login to continue"
+  - Token expiration: "Your session has expired. Please login again"
+  - Field-specific errors: Detailed messages for specific form fields
 
 ## Notification Patterns
 

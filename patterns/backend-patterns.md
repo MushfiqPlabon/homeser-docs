@@ -1,8 +1,66 @@
 # Backend Implementation Patterns
 
-**Last Updated**: 2025-12-03
+**Last Updated**: 2025-12-07
 
 ## Recent Pattern Updates
+
+### Error Handling Decorators (Updated: 2025-12-07)
+
+**Safe Numpy Operations**: Standardized error handling for numpy/sklearn operations with fallback values.
+
+```python
+# homeser/decorators.py
+def safe_numpy_operation(default_value):
+    """Handle numpy/sklearn operation errors with fallback"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except (ImportError, ValueError, TypeError, AttributeError):
+                return default_value
+        return wrapper
+    return decorator
+
+# Usage in intelligence layer
+@safe_numpy_operation(default_value=None)
+def _calculate_distance(lat, lon, df):
+    """Calculate haversine distance vectorized"""
+    import numpy as np
+    # numpy operations without try/except
+    return distances
+```
+
+**Benefits**:
+- DRY principle (no repeated try/except blocks)
+- Consistent error handling
+- Clear fallback behavior
+- Easier to test
+
+### Helper Functions Pattern (Updated: 2025-12-07)
+
+**User Type Helper**: Eliminated duplicate `getattr(user.service_profile, "user_type", None)` calls across codebase.
+
+```python
+# accounts/utils.py
+def get_user_type(user: User) -> Optional[str]:
+    """Get user type from service profile"""
+    return getattr(user.service_profile, "user_type", None)
+
+# Usage in views/services
+from accounts.utils import get_user_type
+
+def get_queryset(self):
+    user_type = get_user_type(self.request.user)
+    if user_type == "admin":
+        return base_qs
+```
+
+**Benefits**:
+- Zero redundancy (DRY principle)
+- Single source of truth
+- Type hints for better IDE support
+- Easier to modify logic in one place
 
 ### Service Layer Pattern (Updated: 2025-12-03)
 
@@ -79,9 +137,10 @@ apps/
 # bookings/services.py
 class BookingValidationService:
     @staticmethod
-    def validate_provider_availability(provider, date, start_time, end_time):
+    def validate_provider_availability(provider, start_time):
         """Validate provider availability for the given time slot"""
         # Business logic implementation
+        # Note: end_time is optional, use duration for scheduling
         pass
     
     @staticmethod

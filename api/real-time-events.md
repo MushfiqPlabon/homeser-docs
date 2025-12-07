@@ -17,10 +17,13 @@ The real-time system provides live updates for critical events like booking stat
 ### Django-Supabase Synchronization
 - Django models automatically synced to Supabase using Django signals
 - Supabase client is lazy-loaded to prevent Django startup blocking
-- Booking model: Synced via post_save/post_delete signals
-- Availability model: Synced via post_save signals
+- Booking model: Synced via post_save/post_delete signals in `bookings/signals.py`
+- Availability model: Synced via post_save signals in `bookings/signals.py`
 - Sync operations: INSERT (new), UPDATE (changes), DELETE (removal)
 - Real-time update propagation from Django models to frontend via Supabase
+- Error handling: Try-catch blocks in signal handlers prevent sync failures from affecting core operations
+- Notification integration: Status changes trigger notification system via `NotificationService.notify_booking_status_change()`
+- Operation tracking: Pre-save signal tracks status changes for notification purposes
 
 ### Connection Management
 - Automatic connection establishment when user logs in
@@ -201,3 +204,8 @@ const { payments, loading, error } = useRealTimePayments(userId);
 - The system includes mock implementation for graceful degradation when Supabase unavailable
 - Event payloads include versioning for future compatibility
 - Connection monitoring helps identify and resolve connectivity issues quickly
+- Signal-based synchronization: Uses Django post_save/post_delete/pre_save signals in `bookings/signals.py` to trigger real-time updates
+- Database-level synchronization: The `homeser.realtime_sync.sync_to_supabase()` function handles actual Supabase table operations
+- Error resilience: All sync operations wrapped in try-catch to prevent failures from impacting core functionality
+- Status change tracking: Pre-save signal tracks booking status transitions for notification purposes
+- Notification integration: Status changes automatically trigger notification services through the Django signal system
